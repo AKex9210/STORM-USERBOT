@@ -19,6 +19,9 @@ else:
 async def set_reminder(client: Client, msg: Message):
     try:
         parts = msg.text.split(maxsplit=2)
+        if len(parts) < 3:
+            raise ValueError("Insufficient arguments provided")
+        
         time_str = parts[1]
         reminder_text = parts[2]
         
@@ -33,15 +36,21 @@ async def set_reminder(client: Client, msg: Message):
             pickle.dump(reminders_db, f)
 
         await msg.reply(f"Reminder set for {time_str}: {reminder_text}")
+    except ValueError as ve:
+        await msg.reply(f"Error: {ve}")
     except Exception as e:
-        await msg.reply("Usage: .setreminder <time> <reminder>")
+        await msg.reply("An unexpected error occurred.")
         print(e)
 
 @Client.on_message(filters.command(["reminders"], ".") & filters.private)
 async def list_reminders(client: Client, msg: Message):
-    user_id = str(msg.from_user.id)
-    if user_id in reminders_db and reminders_db[user_id]:
-        reminders_list = "\n".join([f"{reminder['time']} - {reminder['reminder']}" for reminder in reminders_db[user_id]])
-        await msg.reply(f"Your reminders:\n\n{reminders_list}")
-    else:
-        await msg.reply("You have no reminders set.")
+    try:
+        user_id = str(msg.from_user.id)
+        if user_id in reminders_db and reminders_db[user_id]:
+            reminders_list = "\n".join([f"{reminder['time']} - {reminder['reminder']}" for reminder in reminders_db[user_id]])
+            await msg.reply(f"Your reminders:\n\n{reminders_list}")
+        else:
+            await msg.reply("You have no reminders set.")
+    except Exception as e:
+        await msg.reply("An unexpected error occurred.")
+        print(e)
