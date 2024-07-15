@@ -20,4 +20,4 @@ youtube-search-python
 yt-dlp==2024.03.10
 pyrogram==2.0.105
 openai==0.28
-pytgcalls==0.8.6
+
