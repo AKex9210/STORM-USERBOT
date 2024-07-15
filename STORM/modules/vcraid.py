@@ -1,4 +1,4 @@
-from os import getenv
+"""from os import getenv
 from random import choice
 from pyrogram import filters, Client
 from pyrogram.types import Message
@@ -175,4 +175,4 @@ async def ping(_, e: Message):
         except Exception as e:
             await hero.edit_text(f"» ᴇʀʀᴏʀ\n`{e}`")
     else:
-        await hero.edit_text("» ʀᴀɪᴅ ɪs ᴄᴜʀʀᴇɴᴛʟʏ ᴘᴀᴜsᴇᴅ")            
+        await hero.edit_text("» ʀᴀɪᴅ ɪs ᴄᴜʀʀᴇɴᴛʟʏ ᴘᴀᴜsᴇᴅ")"""         
