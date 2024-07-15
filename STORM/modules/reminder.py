@@ -1,9 +1,8 @@
 import datetime
 import pickle
 import os
-from pyrogram import Client, filters
+from pyrogram import filters
 from pyrogram.types import Message
-from config import API_ID, API_HASH, SUDO_USERS
 
 # Path to the pickle file
 PICKLE_FILE = "reminders.pkl"
@@ -15,32 +14,36 @@ if os.path.exists(PICKLE_FILE):
 else:
     reminders_db = {}
 
-@Client.on_message(filters.command(["setreminder"], ".") & filters.private)
-async def set_reminder(client: Client, msg: Message):
+@app.on_message(filters.command(["setreminder"], "."))
+async def set_reminder_command(client, message):
     try:
-        parts = msg.text.split(maxsplit=2)
-        if len(parts) < 3:
-            raise ValueError("Insufficient arguments provided")
+        command_parts = message.text.split(maxsplit=2)
+        if len(command_parts) < 3:
+            raise ValueError("Usage: .setreminder <time> <text>")
         
-        time_str = parts[1]
-        reminder_text = parts[2]
+        time_str = command_parts[1] + " " + command_parts[2]  # Combine time and text
+        reminder_text = command_parts[3] if len(command_parts) > 3 else ""  # Get reminder text
         
-        user_id = str(msg.from_user.id)
+        # Parse time string into datetime object
+        reminder_time = datetime.datetime.strptime(time_str, "%I:%M %p")
+        
+        user_id = str(message.from_user.id)
         if user_id not in reminders_db:
             reminders_db[user_id] = []
         
-        reminders_db[user_id].append({"time": time_str, "reminder": reminder_text})
+        reminders_db[user_id].append({"time": reminder_time, "reminder": reminder_text})
         
         # Save reminders to pickle file
         with open(PICKLE_FILE, "wb") as f:
             pickle.dump(reminders_db, f)
 
-        await msg.reply(f"Reminder set for {time_str}: {reminder_text}")
+        await message.reply(f"Reminder set for {reminder_time.strftime('%I:%M %p')} - {reminder_text}")
     except ValueError as ve:
-        await msg.reply(f"Error: {ve}")
+        await message.reply(f"Error: {ve}")
     except Exception as e:
-        await msg.reply("An unexpected error occurred.")
+        await message.reply("An unexpected error occurred.")
         print(e)
+
 
 @Client.on_message(filters.command(["reminders"], ".") & filters.private)
 async def list_reminders(client: Client, msg: Message):
